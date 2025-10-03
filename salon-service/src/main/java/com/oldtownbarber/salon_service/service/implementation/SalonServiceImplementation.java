@@ -1,5 +1,6 @@
 package com.oldtownbarber.salon_service.service.implementation;
 
+import com.oldtownbarber.salon_service.exception.SalonException;
 import com.oldtownbarber.salon_service.model.Salon;
 import com.oldtownbarber.salon_service.payload.SalonDTO;
 import com.oldtownbarber.salon_service.payload.UserDTO;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,7 +20,6 @@ public class SalonServiceImplementation implements SalonService {
 
     @Override
     public Salon createSalon(SalonDTO salonDTO, UserDTO userDTO) {
-
         Salon createdSalon = new Salon();
         createdSalon.setName(salonDTO.getName());
         createdSalon.setAddress(salonDTO.getAddress());
@@ -34,24 +35,29 @@ public class SalonServiceImplementation implements SalonService {
     }
 
     @Override
-    public Salon updateSalon(SalonDTO salonDTO, UserDTO userDTO, Long salonId) throws Exception {
+    public Salon updateSalon(SalonDTO salonDTO, UserDTO userDTO, Long salonId) throws SalonException {
+        Optional<Salon> optionalSalon = salonRepository.findById(salonId);
 
-        Salon existingSalon = salonRepository.findById(salonId).orElse(null);
-        if (existingSalon != null && existingSalon.getOwnerId().equals(userDTO.getId())) {
-            existingSalon.setName(salonDTO.getName());
-            existingSalon.setCity(salonDTO.getCity());
-            existingSalon.setAddress(salonDTO.getAddress());
-            existingSalon.setEmail(salonDTO.getEmail());
-            existingSalon.setOpenTime(salonDTO.getOpenTime());
-            existingSalon.setCloseTime(salonDTO.getCloseTime());
-            existingSalon.setPhoneNumber(salonDTO.getPhoneNumber());
-            existingSalon.setImages(salonDTO.getImages());
-            existingSalon.setOwnerId(userDTO.getId());
-
-            return salonRepository.save(existingSalon);
+        if (optionalSalon.isEmpty()) {
+            throw new SalonException("Salón no encontrado con id " + salonId);
         }
 
-        throw new Exception("Salon not exist");
+        Salon existingSalon = optionalSalon.get();
+
+        if (!existingSalon.getOwnerId().equals(userDTO.getId())) {
+            throw new SalonException("No tienes permisos para actualizar este salón");
+        }
+
+        existingSalon.setName(salonDTO.getName());
+        existingSalon.setCity(salonDTO.getCity());
+        existingSalon.setAddress(salonDTO.getAddress());
+        existingSalon.setEmail(salonDTO.getEmail());
+        existingSalon.setOpenTime(salonDTO.getOpenTime());
+        existingSalon.setCloseTime(salonDTO.getCloseTime());
+        existingSalon.setPhoneNumber(salonDTO.getPhoneNumber());
+        existingSalon.setImages(salonDTO.getImages());
+
+        return salonRepository.save(existingSalon);
     }
 
     @Override
@@ -60,13 +66,9 @@ public class SalonServiceImplementation implements SalonService {
     }
 
     @Override
-    public Salon getSalonById(Long salonId) throws Exception {
-        Salon salon = salonRepository.findById(salonId).orElse(null);
-        if (salon == null) {
-            throw new Exception("Salon not exist");
-        }
-
-        return salon;
+    public Salon getSalonById(Long salonId) throws SalonException {
+        return salonRepository.findById(salonId)
+                .orElseThrow(() -> new SalonException("Salón no encontrado con id " + salonId));
     }
 
     @Override

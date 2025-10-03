@@ -2,7 +2,9 @@ package com.oldtownbarber.salon_service.mapper;
 
 import com.oldtownbarber.salon_service.model.Salon;
 import com.oldtownbarber.salon_service.payload.SalonDTO;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SalonMapper {
 
     public static SalonDTO mapToDTO(Salon salon) {
