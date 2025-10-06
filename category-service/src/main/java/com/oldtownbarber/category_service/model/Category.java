@@ -24,7 +24,4 @@ public class Category {
     @Column(nullable = false)
     private Long salonId;
 
-
-
-
 }
