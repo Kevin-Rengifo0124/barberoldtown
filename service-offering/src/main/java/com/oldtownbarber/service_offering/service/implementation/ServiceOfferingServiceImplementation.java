@@ -37,20 +37,37 @@ public class ServiceOfferingServiceImplementation implements ServiceOfferingServ
 
     @Override
     public ServiceOffering updateService(Long serviceId, ServiceOffering serviceOffering) throws Exception {
-        ServiceOffering service = serviceOfferingRepository.findById(serviceId).orElse(null);
+        ServiceOffering existingService = serviceOfferingRepository.findById(serviceId)
+                .orElseThrow(() -> new Exception("No existe ese servicio con ese ID " + serviceId));
 
-        if (service == null) {
-            throw new Exception("No existe ese servicio con ese ID " + serviceId);
+        // Solo actualizar si el valor no es null o diferente de 0
+        if (serviceOffering.getName() != null && !serviceOffering.getName().isEmpty()) {
+            existingService.setName(serviceOffering.getName());
         }
 
-        serviceOffering.setImage(service.getImage());
-        serviceOffering.setName(service.getName());
-        serviceOffering.setDescription(service.getDescription());
-        serviceOffering.setPrice(service.getPrice());
-        serviceOffering.setDuration(service.getDuration());
+        if (serviceOffering.getDescription() != null && !serviceOffering.getDescription().isEmpty()) {
+            existingService.setDescription(serviceOffering.getDescription());
+        }
 
-        return serviceOfferingRepository.save(serviceOffering);
+        if (serviceOffering.getPrice() > 0) {
+            existingService.setPrice(serviceOffering.getPrice());
+        }
+
+        if (serviceOffering.getDuration() > 0) {
+            existingService.setDuration(serviceOffering.getDuration());
+        }
+
+        if (serviceOffering.getImage() != null && !serviceOffering.getImage().isEmpty()) {
+            existingService.setImage(serviceOffering.getImage());
+        }
+
+        if (serviceOffering.getCategoryId() != null) {
+            existingService.setCategoryId(serviceOffering.getCategoryId());
+        }
+
+        return serviceOfferingRepository.save(existingService);
     }
+
 
     @Override
     public Set<ServiceOffering> getAllServiceBySalon(Long salonId, Long categoryId) {

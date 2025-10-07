@@ -62,7 +62,7 @@ public class SalonServiceOfferingController {
     public ResponseEntity<ServiceOffering> updateService(
             @PathVariable
             @Parameter(description = "ID del servicio a actualizar", required = true) Long serviceId,
-            @RequestBody @Valid
+            @RequestBody 
             @Parameter(description = "Datos actualizados del servicio", required = true) ServiceOffering serviceOffering) throws Exception {
 
         ServiceOffering serviceOfferings = serviceOfferingService.updateService(serviceId, serviceOffering);
