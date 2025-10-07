@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatIA - Barbería</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* PANEL IZQUIERDO - CHAT */
+        .chat-panel {
+            width: 400px;
+            background: #f5f5f7;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: background 0.2s;
+        }
+
+        .back-button:hover {
+            background: #e0e0e0;
+        }
+
+        .chat-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            background: #667eea;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.agent {
+            background: #e9e9eb;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.processing {
+            background: #d0d0d2;
+            color: #666;
+            align-self: flex-start;
+            font-style: italic;
+        }
+
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .add-button, .emoji-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: background 0.2s;
+        }
+
+        .send-button:hover {
+            background: #5568d3;
+        }
+
+        /* PANEL DERECHO - RESULTADOS */
+        .results-panel {
+            flex: 1;
+            background: #f8f8f8;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .results-header {
+            padding: 30px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .results-header h2 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .results-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        /* TABLA DE RESULTADOS */
+        .results-table {
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .results-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table thead {
+            background: #f5f5f7;
+        }
+
+        .results-table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .results-table td {
+            padding: 16px;
+            color: #666;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .results-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        /* TARJETAS DE RESULTADOS */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .result-card h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .result-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .result-card .price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 12px;
+        }
+
+        /* ESTADO VACÍO */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #666;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f0f0f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .chat-panel {
+                width: 100%;
+                height: 60%;
+            }
+
+            .results-panel {
+                height: 40%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- PANEL DE CHAT -->
+        <div class="chat-panel">
+            <div class="chat-header">
+                <button class="back-button" onclick="window.history.back()">←</button>
+                <span class="chat-title">ChatIA</span>
+            </div>
+
+            <div class="messages-container" id="messages"></div>
+
+            <div class="input-container">
+                <button class="add-button">+</button>
+                <button class="emoji-button">😊</button>
+                <input 
+                    type="text" 
+                    class="chat-input" 
+                    id="chatInput"
+                    placeholder="Escribe tu mensaje..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button class="send-button" onclick="sendMessage()">
+                    🔍
+                </button>
+            </div>
+        </div>
+
+        <!-- PANEL DE RESULTADOS -->
+        <div class="results-panel">
+            <div class="results-header">
+                <h2>Respuesta:</h2>
+            </div>
+            <div class="results-content" id="results">
+                <div class="empty-state">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <h3>¡Bienvenido a ChatIA!</h3>
+                    <p>Pregúntame sobre nuestros barberos y servicios</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // AGREGAR MENSAJE AL CHAT
+        function addMessage(text, type) {
+            const container = document.getElementById('messages');
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.textContent = text;
+            container.appendChild(message);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // MOSTRAR ESTADO DE CARGA
+        function showLoading() {
+            const results = document.getElementById('results');
+            results.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Procesando tu consulta...</p>
+                </div>
+            `;
+        }
+
+        // RENDERIZAR TABLA
+        function renderTable(data, columns) {
+            let html = '<div class="results-table"><table><thead><tr>';
+            columns.forEach(col => {
+                html += `<th>${col}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            data.forEach(row => {
+                html += '<tr>';
+                columns.forEach(col => {
+                    const key = col.toLowerCase().replace(' ', '_');
+                    html += `<td>${row[key] || ''}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table></div>';
+            return html;
+        }
+
+        // RENDERIZAR TARJETAS
+        function renderCards(data) {
+            let html = '<div class="results-grid">';
+            data.forEach(item => {
+                html += `
+                    <div class="result-card">
+                        <h3>${item.nombre}</h3>
+                        ${item.descripcion ? `<p>${item.descripcion}</p>` : ''}
+                        ${item.especialidad ? `<p><strong>Especialidad:</strong> ${item.especialidad}</p>` : ''}
+                        ${item.duracion_minutos ? `<p><strong>Duración:</strong> ${item.duracion_minutos} min</p>` : ''}
+                        ${item.precio ? `<div class="price">$${item.precio.toLocaleString()}</div>` : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+            return html;
+        }
+
+        // PROCESAR RESPUESTA
+        function processResponse(data) {
+            const results = document.getElementById('results');
+            
+            if (typeof data === 'string') {
+                addMessage(data, 'agent');
+                results.innerHTML = `
+                    <div class="empty-state">
+                        <p>${data}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (Array.isArray(data)) {
+                if (data.length === 0) {
+                    results.innerHTML = '<div class="empty-state"><p>No se encontraron resultados</p></div>';
+                    return;
+                }
+
+                // Detectar tipo de datos
+                if (data[0].barbero && data[0].cortes_disponibles) {
+                    // Tabla de cortes por barbero
+                    let html = '<div class="results-table"><table><thead><tr><th>Barbero</th><th>Cortes Disponibles</th></tr></thead><tbody>';
+                    data.forEach(item => {
+                        html += `<tr><td>${item.barbero}</td><td>${item.cortes_disponibles.join(', ')}</td></tr>`;
+                    });
+                    html += '</tbody></table></div>';
+                    results.innerHTML = html;
+                } else {
+                    // Tarjetas para barberos o cortes
+                    results.innerHTML = renderCards(data);
+                }
+            } else {
+                // Objeto individual
+                results.innerHTML = renderCards([data]);
+            }
+        }
+
+        // ENVIAR MENSAJE
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Agregar mensaje del usuario
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Agregar estado de procesamiento
+            addMessage('Procesando...', 'processing');
+            showLoading();
+
+            try {
+                const response = await fetch('/query', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ consulta: message })
+                });
+
+                const result = await response.json();
+                
+                // Eliminar mensaje de procesamiento
+                const messages = document.getElementById('messages');
+                messages.removeChild(messages.lastChild);
+
+                // Procesar respuesta
+                processResponse(result.data);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('❌ Error al conectar con el servidor', 'agent');
+                document.getElementById('results').innerHTML = `
+                    <div class="empty-state">
+                        <p>Error al procesar la solicitud</p>
+                    </div>
+                `;
+            }
+        }
+
+        // MANEJAR ENTER
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Mensaje de bienvenida al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            addMessage('¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?', 'agent');
+        });
+    </script>
+</body>
+</html>

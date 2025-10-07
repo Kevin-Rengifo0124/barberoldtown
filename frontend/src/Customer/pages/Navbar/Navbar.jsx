@@ -22,9 +22,6 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
 
-  // 🔹 Puedes cambiar esta URL a la ruta que necesites
-  const iaUrl = "/ia"; // ejemplo: "/ia", "https://tuapp.com/ia", etc.
-
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -75,11 +72,11 @@ const Navbar = () => {
             Inicio
           </h1>
 
-          {/* 🔹 Nuevo botón IA */}
+          {/* 🔹 Botón IA (abre /ia/index.html desde public/) */}
           <Button
             variant="contained"
             color="primary"
-            onClick={() => navigate(iaUrl)}
+            onClick={() => window.open("/AGENT/index.html", "_blank")}
             sx={{ textTransform: "none" }}
           >
             IA
