@@ -3,18 +3,15 @@ import {
   Badge,
   Button,
   IconButton,
-  InputAdornment,
   Menu,
   MenuItem,
-  OutlinedInput,
 } from "@mui/material";
 import React, { useEffect } from "react";
-import SearchIcon from "@mui/icons-material/Search";
 import { useNavigate } from "react-router-dom";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../Redux/Auth/action";
-import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import useNotificationWebsoket from "../../../util/useNotificationWebsoket";
 import { fetchNotificationsByUser } from "../../../Redux/Notifications/action";
 import { useTheme } from "@emotion/react";
@@ -25,17 +22,19 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const theme = useTheme();
 
+  // 🔹 Puedes cambiar esta URL a la ruta que necesites
+  const iaUrl = "/ia"; // ejemplo: "/ia", "https://tuapp.com/ia", etc.
+
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const handleClose = () => setAnchorEl(null);
 
   const handleMenuClick = (path) => () => {
-    if (path == "/logout") {
+    if (path === "/logout") {
       dispatch(logout());
       navigate("/");
       handleClose();
@@ -44,30 +43,50 @@ const Navbar = () => {
     navigate(path);
     handleClose();
   };
+
   useEffect(() => {
     if (auth.user?.id) {
-      dispatch(fetchNotificationsByUser({
-        userId: auth.user.id,
-        jwt: localStorage.getItem('jwt')
-      }));
+      dispatch(
+        fetchNotificationsByUser({
+          userId: auth.user.id,
+          jwt: localStorage.getItem("jwt"),
+        })
+      );
     }
   }, [auth.user]);
 
-  useNotificationWebsoket(auth.user?.id, "user")
+  useNotificationWebsoket(auth.user?.id, "user");
+
   return (
-    <div className={`z-50  px-6  flex items-center justify-between  py-2 fixed top-0 left-0 right-0 bg-white`}>
+    <div className="z-50 px-6 flex items-center justify-between py-2 fixed top-0 left-0 right-0 bg-white">
       <div className="flex items-center gap-10">
         <h1
           onClick={() => navigate("/")}
-          className="cursor-pointer font-bold lg:text-2xl "
+          className="cursor-pointer font-bold lg:text-2xl"
         >
           Old Town Barber
         </h1>
-        <div className="lg:flex items-center gap-5 hidden">
-          <h1 className="cursor-pointer hover:text-primary-color" onClick={() => navigate("/")}>Inicio</h1>
 
+        <div className="lg:flex items-center gap-5 hidden">
+          <h1
+            className="cursor-pointer hover:text-primary-color"
+            onClick={() => navigate("/")}
+          >
+            Inicio
+          </h1>
+
+          {/* 🔹 Nuevo botón IA */}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => navigate(iaUrl)}
+            sx={{ textTransform: "none" }}
+          >
+            IA
+          </Button>
         </div>
       </div>
+
       <div className="flex items-center gap-3 md:gap-6">
         <Button onClick={() => navigate("/become-partner")} variant="outlined">
           Conviértase en socio
@@ -75,14 +94,15 @@ const Navbar = () => {
 
         <IconButton onClick={() => navigate("/notifications")}>
           <Badge badgeContent={notification.unreadCount} color="secondary">
-            {/* <MailIcon color="action" /> */}
             <NotificationsActiveIcon color="primary" />
           </Badge>
         </IconButton>
 
         {auth.user?.id ? (
           <div className="flex gap-1 items-center">
-            <h1 className="text-lg font-semibold hidden lg:block">{auth.user?.fullName}</h1>
+            <h1 className="text-lg font-semibold hidden lg:block">
+              {auth.user?.fullName}
+            </h1>
 
             <IconButton
               id="basic-button"
@@ -92,9 +112,11 @@ const Navbar = () => {
               onClick={handleClick}
             >
               <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
-                {auth.user?.fullName && auth.user?.fullName[0].toUpperCase()}
+                {auth.user?.fullName &&
+                  auth.user?.fullName[0].toUpperCase()}
               </Avatar>
             </IconButton>
+
             <Menu
               id="basic-menu"
               anchorEl={anchorEl}
@@ -104,19 +126,24 @@ const Navbar = () => {
                 "aria-labelledby": "basic-button",
               }}
             >
-              {/* <MenuItem onClick={handleMenuClick("/profile")}>Profile</MenuItem> */}
               <MenuItem onClick={handleMenuClick("/bookings")}>
                 Mis reservas
               </MenuItem>
-              {auth.user?.role === "SALON_OWNER" && <MenuItem onClick={handleMenuClick("/salon-dashboard")}>
-                Panel de control
-              </MenuItem>}
-              <MenuItem onClick={handleMenuClick("/logout")}>Cerrar sesión</MenuItem>
+              {auth.user?.role === "SALON_OWNER" && (
+                <MenuItem onClick={handleMenuClick("/salon-dashboard")}>
+                  Panel de control
+                </MenuItem>
+              )}
+              <MenuItem onClick={handleMenuClick("/logout")}>
+                Cerrar sesión
+              </MenuItem>
             </Menu>
           </div>
         ) : (
           <IconButton onClick={() => navigate("/login")}>
-            <AccountCircleIcon sx={{ fontSize: "45px", color: theme.palette.primary.main }} />
+            <AccountCircleIcon
+              sx={{ fontSize: "45px", color: theme.palette.primary.main }}
+            />
           </IconButton>
         )}
       </div>
