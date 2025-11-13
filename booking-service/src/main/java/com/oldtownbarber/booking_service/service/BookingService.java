@@ -14,15 +14,15 @@ import java.util.Set;
 
 public interface BookingService {
 
-    Booking createBooking(BookingRequest booking, UserDTO user, SalonDTO salon, Set<ServiceDTO> serviceDTOSet);
+    Booking createBooking(BookingRequest booking, UserDTO user, SalonDTO salon, Set<ServiceDTO> serviceDTOSet) throws Exception;
 
     List<Booking> getBookingsByCustomer(Long customerId);
 
     List<Booking> getBookingsBySalon(Long salonId);
 
-    Booking getBookingById(Long id);
+    Booking getBookingById(Long id) throws Exception;
 
-    Booking updateBooking(Long bookingId, BookingStatus bookingStatus);
+    Booking updateBooking(Long bookingId, BookingStatus bookingStatus) throws Exception;
 
     List<Booking> getBookingsByDate(LocalDate date, Long salonId);
 
