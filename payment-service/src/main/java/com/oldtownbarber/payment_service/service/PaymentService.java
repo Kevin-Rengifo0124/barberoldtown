@@ -5,6 +5,7 @@ import com.oldtownbarber.payment_service.payload.dto.BookingDTO;
 import com.oldtownbarber.payment_service.payload.dto.UserDTO;
 import com.oldtownbarber.payment_service.model.PaymentOrder;
 import com.oldtownbarber.payment_service.payload.response.PaymentLinkResponse;
+import com.razorpay.PaymentLink;
 
 public interface PaymentService {
 
@@ -14,5 +15,8 @@ public interface PaymentService {
 
     PaymentOrder getPaymentOrderByPaymentId(String paymentId);
 
+    PaymentLink createRazorpayPaymentLink(UserDTO userDTO, Long amount, Long orderId);
+    
+    String createStripePaymentLink(UserDTO userDTO, Long amount, Long orderId);
 }
 
