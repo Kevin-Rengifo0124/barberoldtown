@@ -44,7 +44,7 @@ public class BookingServiceImplementation implements BookingService {
 
         Booking newBooking = new Booking();
         newBooking.setCustomerId(user.getId());
-        newBooking.setSalondId(salon.getId());
+        newBooking.setSalonId(salon.getId());
         newBooking.setServiceIds(idList);
         newBooking.setStatus(BookingStatus.PENDING);
         newBooking.setStartTime(bookingStartTime);
